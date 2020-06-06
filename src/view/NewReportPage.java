@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import model.Accident;
 import model.DatabaseConnection.Status;
 import model.Vehicle;
@@ -308,8 +309,25 @@ public class NewReportPage extends PageAbstract implements CommandEventListener<
         //listSelector.getScrollSelector().setRowHeight(30);
     }
     
+    
+    // List of all vehicles to selection
     private void printList(){
         listSelector.getListPanel().reset();
+        // If there are selected vehicles keep on top
+        if(!vehiclesInvolved.isEmpty()){
+            ArrayList<Vehicle> repository = vehiclesOnList;//
+            vehiclesOnList = new ArrayList<>();
+            for (Vehicle item : vehiclesInvolved) {
+                vehiclesOnList.add(item);
+            }
+
+            for (Vehicle item : repository) {
+                if(!vehiclesInvolved.contains(item)){//avoid clones
+                    vehiclesOnList.add(item);
+                }
+            }
+        }
+        
         for(Vehicle vehicle: vehiclesOnList){
             ArrayList<String> labels = new ArrayList<>();
             labels.add(vehicle.getPlate());
@@ -350,11 +368,16 @@ public class NewReportPage extends PageAbstract implements CommandEventListener<
         });
         
         for(Vehicle item:vehicles){
-            if(item.getPlate().contains(pattern)){
+            if(item.getPlate().toLowerCase().contains(pattern.toLowerCase())){
                 boolean exists = matchs.contains(item);
                 if(!exists)matchs.add(item);
             }
         }
+        if(matchs.isEmpty())
+            listSelector.getResultsOutput().setText("0");
+        else
+            listSelector.getResultsOutput().setText(matchs.size()+"");    
+        
         vehiclesOnList = matchs;
         printList();
     }
@@ -385,6 +408,7 @@ public class NewReportPage extends PageAbstract implements CommandEventListener<
         printList();
     }
     
+    // List of selected vehicles
     private void printInvolvedList(){
         closeList();
         form.getListPanel().reset();
@@ -476,6 +500,7 @@ public class NewReportPage extends PageAbstract implements CommandEventListener<
         form.getErrorLabel().setText("");
         form.getLocationIN().setText("");
         form.getCommentsIN().setText("");
+        successMessage("");
         printInvolvedList();
     }
     

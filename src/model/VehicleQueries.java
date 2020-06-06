@@ -51,7 +51,7 @@ public class VehicleQueries {
         ArrayList<Vehicle> list = new ArrayList<>();
         try {
             db.openConnection();
-            resultSet = db.runQuery("select * from "+DatabaseConnection.VEHICLES);
+            resultSet = db.runQuery("select * from "+DatabaseConnection.VEHICLES +" order by "+OWNER_NAME+ " asc");
             if(resultSet != null){
                 list.add(buildVehicle(resultSet));
                 while(resultSet.next())

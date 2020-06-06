@@ -73,7 +73,7 @@ public class VehiclesPage extends PageAbstract{
             vehiclesFiltered = new ArrayList<>();
 
             for(Vehicle item:vehicles){
-                if(item.getOwnerName().contains(pattern)){
+                if(item.getOwnerName().toLowerCase().contains(pattern.toLowerCase())){
                     boolean exists = vehiclesFiltered.contains(item);
                     if(!exists)vehiclesFiltered.add(item);
                 }
@@ -86,7 +86,7 @@ public class VehiclesPage extends PageAbstract{
             vehiclesFiltered = new ArrayList<>();
 
             for(Vehicle item:vehicles){
-                if(item.getPlate().contains(pattern)){
+                if(item.getPlate().toLowerCase().contains(pattern.toLowerCase())){
                     boolean exists = vehiclesFiltered.contains(item);
                     if(!exists)vehiclesFiltered.add(item);
                 }
