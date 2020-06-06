@@ -152,8 +152,8 @@ public class DatabaseConnection {
         return Status.DELETED;
     }
     
-    public static Status addAccidents(ArrayList<Accident> accidents){
-        DatabaseConnection db = new DatabaseConnection(null);
+    public static Status addAccidents(ArrayList<Accident> accidents,AppPresenter app){
+        DatabaseConnection db = new DatabaseConnection(app);
         try {
             db.openConnection();
              String query = "insert into "
@@ -164,35 +164,11 @@ public class DatabaseConnection {
                     + AccidentQueries.DATE +") values (?,?,?)";
             PreparedStatement st = db.getStatement(query); 
             
-            
-            //relationship
-             HashMap<Integer,String> map = new HashMap();
-            
             for(Accident accident: accidents){
                 st.setString(1, accident.getLocation());
-                String comments = accident.getComments().replaceAll("\\n","<br>");
-                st.setString(2, comments);
+                st.setString(2, accident.getComments());
                 Timestamp stamp = Timestamp.valueOf(accident.getDate());
                 st.setTimestamp(3, stamp);
-                st.addBatch();
-                //save plates: to relationship
-                for(String plate: accident.getPlates())
-                    map.put(accident.getID(), plate);                
-            }
-            st.executeBatch();
-            
-            query = "insert into "
-                    +DatabaseConnection.TABLE_AC 
-                    +" ("
-                    + AccidentQueries.ID +", "
-                    + VehicleQueries.PLATE +", "
-                    + AccidentQueries.DATE 
-                    +") values (?,?,?)";
-            st = db.getStatement(query);
-            for (Iterator<Map.Entry<Integer, String>> item = map.entrySet().iterator(); item.hasNext();) {
-                Map.Entry e = item.next();
-                st.setInt(1, (int) e.getKey());
-                st.setString(2, (String) e.getValue());
                 st.addBatch();
             }
             st.executeBatch();
@@ -202,11 +178,50 @@ public class DatabaseConnection {
         }finally{
             db.closeConnection();
         }
+        return addRelationship(accidents,db);
+    }
+    
+    private static Status addRelationship(ArrayList<Accident> accidents,DatabaseConnection db){
+        String query = "select * from "+DatabaseConnection.ACCIDENTS +" where "+AccidentQueries.COMMENTS+"=?";
+        try {
+            db.openConnection();
+            PreparedStatement st = db.getStatement(query);
+            st.setString(1, accidents.get(0).getComments());
+            ResultSet rs = st.executeQuery();
+            if(rs != null){
+                while(rs.next()){
+                    String L = rs.getString(AccidentQueries.LOCATION);
+                    for(Accident accident: accidents){
+                        if(accident.getLocation().equals(L)){
+                            int id = rs.getInt(AccidentQueries.ID);
+                            accident.setID(id);
+                        }
+                    }
+                }//
+                query = "insert into "+DatabaseConnection.TABLE_AC +" ("+ AccidentQueries.ID +", "+ VehicleQueries.PLATE +") values (?,?)";
+                st = db.getStatement(query);
+                for(Accident accident: accidents){
+                    for(String plate:accident.getPlates()){
+                        st.setInt(1, accident.getID());
+                        st.setString(2, plate);
+                        st.addBatch();
+                    }
+                }
+                st.executeBatch();
+            }else{
+                return Status.ERROR;
+            }
+        } catch (SQLException ex) {
+             printError(db, "addRelationship", ex);
+            return Status.ERROR;
+        }finally{
+            db.closeConnection();
+        }
         return Status.CREATED;
     }
     
-    public static Status deleteAccidents(ArrayList<Accident> accidents){
-        DatabaseConnection db = new DatabaseConnection(null);
+    public static Status deleteAccidents(ArrayList<Accident> accidents,AppPresenter app){
+        DatabaseConnection db = new DatabaseConnection(app);
         try {
             db.openConnection();
             String query = "delete from " +DatabaseConnection.ACCIDENTS +" where "+AccidentQueries.ID+"=?";

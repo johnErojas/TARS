@@ -45,25 +45,22 @@ public class AppPresenterTest {
      */
     @Before
     public void testStart() {
+        this.App.start();
         this.action = ACTIONS.CREATE;
-        this.numEntries = 200;
+        this.numEntries = 500;
     }
 
     @Test
     public void runTest(){
         if(this.action == ACTIONS.CREATE){
             addVehicles();
-            Theme.goToSleep(this.delay, () -> {
-                addAccidents();
-            });
+            addAccidents();
         }
         
         
         if(this.action == ACTIONS.DELETE){
             deleteAccidents();
-            Theme.goToSleep(this.delay, () -> {
-                deleteVehicles();
-            });
+            deleteVehicles();
         }
     }
 
@@ -103,15 +100,20 @@ public class AppPresenterTest {
             Accident accident = new Accident();
             accident.setLocation(i+" Street "+ random.nextInt(this.numEntries));
             accident.setDate(Theme.getNow());
-            accident.setComments("delete me");
+            accident.setComments("delete_me");//Do not change it, because it is necesary to find after creation to get their ID, and create relationship.
+            // the query use "where comments=?"
             //take some vehicles in a range
             int vRange = random.nextInt(5) + 1;//to avid get 0 results
             ArrayList<String> plates = new ArrayList<>();
             for(int n = 0;n<vRange;n++){
                 //one on the list
-                String plate = vehicles.get(random.nextInt(range)).getPlate();
-                while(plates.contains(plate))//get other if already it is in the list
-                     plate = vehicles.get(random.nextInt(range)).getPlate();
+                int veIndex = random.nextInt(range);
+                String plate = vehicles.get(veIndex).getPlate();
+                while(plates.contains(plate)){//get other if already it is in the list
+                     veIndex = random.nextInt(range);
+                     plate = vehicles.get(veIndex).getPlate();
+                }
+                plates.add(plate);
                accident.setPlates(plates);
             }
             accidents.add(accident);
@@ -130,7 +132,7 @@ public class AppPresenterTest {
     public void addAccidents(){
         System.out.println("addAccidents");
         DatabaseConnection.Status expResult = DatabaseConnection.Status.CREATED;
-        DatabaseConnection.Status result = DatabaseConnection.addAccidents(prepareAccidents());
+        DatabaseConnection.Status result = DatabaseConnection.addAccidents(prepareAccidents(),App);
         assertEquals(expResult, result);
         
     }
@@ -148,13 +150,13 @@ public class AppPresenterTest {
         
         ArrayList<Accident> toDelete = new ArrayList<>();
         for(Accident accident: repository){
-            if(accident.getComments().equalsIgnoreCase("delete me"))
+            if(accident.getComments().equalsIgnoreCase("delete_me"))
                 toDelete.add(accident);
         }
         
         if(!toDelete.isEmpty()){
             DatabaseConnection.Status expResult = DatabaseConnection.Status.DELETED;
-            DatabaseConnection.Status result = DatabaseConnection.deleteAccidents(toDelete);
+            DatabaseConnection.Status result = DatabaseConnection.deleteAccidents(toDelete,App);
             assertEquals(expResult, result);
         }
         

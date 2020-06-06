@@ -10,7 +10,6 @@ import static java.lang.Thread.sleep;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
@@ -44,6 +43,7 @@ public class Theme {
         public static final String REPORT = "ico_report";
         public static final String ACCIDENT = "ico_crash";
         public static final String VEHICLE = "ico_vehicle";
+        public static final String DB_ERROR = "ico_db_error";
         
         public static final String BUTTON_NORMAL = "../button_normal";
         public static ImageIcon getIcon(String name){

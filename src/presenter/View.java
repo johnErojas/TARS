@@ -28,7 +28,7 @@ public class View {
         gui.start();
         pagesHandler.start();
         pagesHandler.activeDashboardActions(gui.getNav().getItems(), PagesHandler.PAGES.HOME);
-        pagesHandler.openPage(PagesHandler.PAGES.VEHICLES);
+        pagesHandler.openPage(PagesHandler.PAGES.HOME);
     }
 
     public AppPresenter getAppPresenter() {

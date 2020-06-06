@@ -44,35 +44,53 @@ public class AppPresenter
     }
     
     
-    
+    private Alert alert;
     public void noDatabaseConnection(){
         if(view!=null){
             view.getGui().setVisible(false);
         }
         
-        Theme.EnterFrame(new Theme.EnterFrameInterface() {
-            int counter = 5;
-            String message = "The System cannot connect to the database<br>Please check your connection and try again in " ;
-            Alert alert = new Alert().showMessage("CONNECTION ERROR",message + "<h1 style=\"text-align:center\">" + counter + "</h1>");
+        alert = new Alert();
+        
+        
+        
+        Theme.EnterFrameInterface enterFrameAdapter = new Theme.EnterFrameInterface() {
+            int counter = 15;
             @Override
             public boolean stopNow() {
                 return counter < 1;
             }
-
             @Override
             public void run() {
-                alert.replaceMessage(message + "<h1 style=\"text-align:center\">" + counter + "</h1>");
+                if(alert == null)return;
+                alert.replaceMessage(buildMessageDBError(counter));
                 counter--;
             }
-
             @Override
             public void onStoped() {
-                alert.setVisible(false);
-                alert.closeWindow();
-                System.exit(0);
+                finishSystemByDBError();
             }
-        }, 1000);
+        };
+        alert.showMessage("DB Error",buildMessageDBError(20),new Alert.AlertAdapter() {
+            @Override
+            public void onClosed() {
+                finishSystemByDBError();
+            }
+        }).changeIcon(Theme.ICON.getIcon(Theme.ICON.DB_ERROR));
+        Theme.EnterFrame(enterFrameAdapter, 1000);
         
     }
     
+    
+    private String buildMessageDBError(int counter){
+        return "The System cannot connect to the database<br>Please check your connection and try again in <h1 style=\"text-align:center\"> " + counter + "</h1>";
+    }
+    private void finishSystemByDBError(){
+        if(alert !=null){
+            alert.closeWindow();
+            System.exit(0);
+            alert = null;
+        }
+        
+    }
 }

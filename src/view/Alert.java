@@ -7,6 +7,7 @@ package view;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import javax.swing.ImageIcon;
 import view.componets.Theme;
 
 /**
@@ -15,6 +16,7 @@ import view.componets.Theme;
  */
 public class Alert extends javax.swing.JFrame implements MouseListener{
 
+    private boolean opened;
     @Override
     public void mouseClicked(MouseEvent e) {
         
@@ -45,9 +47,11 @@ public class Alert extends javax.swing.JFrame implements MouseListener{
     }
 
     public void closeWindow() {
-        if(listener!=null)listener.onClosed();
+        if(!this.opened)return;
         setVisible(false); //you can't see me!
         dispose();
+        this.opened = false;
+        if(listener!=null)listener.onClosed();
     }
 
     private void yesClicked() {
@@ -84,10 +88,20 @@ public class Alert extends javax.swing.JFrame implements MouseListener{
      * Creates new form Alert
      */
     public Alert() {
+        opened = false;
         this.setUndecorated(true);
         initComponents();
         setupCommands();
     }
+
+    public boolean isOpened() {
+        return opened;
+    }
+
+    public void setOpened(boolean opened) {
+        this.opened = opened;
+    }
+    
     
     
     private void setupCommands(){
@@ -141,10 +155,16 @@ public class Alert extends javax.swing.JFrame implements MouseListener{
         return this;
     }
     
+    public Alert changeIcon(ImageIcon icon){
+        this.icon.setIcon(icon);
+        return this;
+    }
+    
 
     private Alert showIt(){
         this.setLocationRelativeTo(null);
         this.setVisible(true);
+        this.opened = true;
         return this;
     }
 
@@ -208,7 +228,8 @@ public class Alert extends javax.swing.JFrame implements MouseListener{
 
         iconBox.setBackground(null);
 
-        icon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/icons/ico_crash.png"))); // NOI18N
+        icon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        icon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/icons/ico_alert.png"))); // NOI18N
 
         javax.swing.GroupLayout iconBoxLayout = new javax.swing.GroupLayout(iconBox);
         iconBox.setLayout(iconBoxLayout);
@@ -221,7 +242,7 @@ public class Alert extends javax.swing.JFrame implements MouseListener{
         );
         iconBoxLayout.setVerticalGroup(
             iconBoxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(icon, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+            .addComponent(icon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         messageBox.setBackground(null);
